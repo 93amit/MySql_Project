@@ -1,0 +1,187 @@
+###  MySql Project_2
+
+create database Mysql_Project_2;
+use Mysql_Project_2;
+show tables;
+select * from walmartsalesdata_2024;
+
+# 1. How many unique cities does the data have?
+
+select distinct city
+from walmartsalesdata_2024;
+
+-- 2. In which city is each branch?
+
+select city,
+Branch
+ from walmartsalesdata_2024
+where branch in('a','b','c') order by Branch;
+
+select  City,Branch
+from walmartsalesdata_2024 
+where branch in('a','b','c');
+
+select *
+-- distinct Product_line 
+from walmartsalesdata_2024;
+
+### Product
+
+-- > 1. How many unique product lines does the data have?
+-- > ANS => Health and beauty,Electronic accessories,Home and lifestyl,Sports and travel,Food and beverages,Fashion accessories
+
+select distinct product_line
+from walmartsalesdata_2024;
+    ##     or
+select Product_line,
+count(Invoice_ID) as Invoice,
+count(City) as Num_Of_City,
+round(sum(Total),0) as Total_generated_amount
+from walmartsalesdata_2024
+group by 1;
+
+-- > 2. What is the most common payment method?
+-- >ANS => Ewallet =>	345
+
+select Payment,
+count(*) as count
+from walmartsalesdata_2024
+group by Payment order by Payment desc
+limit 1;
+
+--  AND
+
+select
+ payment,
+ count(payment) as mostPayment_count,
+ count(Invoice_ID) as Invoice
+-- rank () over(partition by Invoice_ID ) as rnk
+from walmartsalesdata_2024
+group by 1;
+
+
+-- > 3. What is the most selling product line?
+-- > ANS => Fashion accessories	=>178
+
+select product_line,
+count(*) as MostSelling_Product
+from walmartsalesdata_2024
+group by 1
+order by MostSelling_Product desc
+limit 1;
+
+-- > 4. What is the total revenue by month?
+-- > ANS ==> execute the Query
+
+select month(Date) as Month,
+round(sum(Total)/1.18,0) as Total_Revenue 
+from walmartsalesdata_2024
+group by 1
+order by Month asc;
+
+-- > 5. What month had the largest COGS?
+-- > ANS => in 9 month  =>13112
+
+select month(date) as Month,
+round(sum(cogs),0) as COGSbyMonth 
+from walmartsalesdata_2024
+group by 1
+order by COGSbyMonth desc 
+limit 1 offset 1;
+
+
+-- > 6. What product line had the largest revenue?
+-- > ANS => Food and beverages => 47580
+
+select Product_line,
+round(sum(Total)/1.18,0) as Revenue 
+from walmartsalesdata_2024
+group by 1
+order by Revenue desc
+limit 1;
+
+-- 7. What is the city with the largest revenue?
+-- > ANS => Naypyitaw	93702
+select city,
+round(sum(Total)/1.18,0) as Revenue
+from walmartsalesdata_2024
+group by 1
+order by Revenue desc
+limit 1;
+
+select * from walmartsalesdata_2024;
+
+-- 8. What product line had the largest VAT?
+-- > ANS => Fashion accessories	50%
+select 
+Product_line,
+round(max(Tax_5_percent),0) as VAT 
+from walmartsalesdata_2024
+group by 1
+order by VAT desc
+limit 1;
+
+-- 9. Fetch each product line and add a column to those product line showing "Good", "Bad". Good if its greater than average sales
+
+select 
+Product_line, 
+Total,
+CASE 
+      WHEN Total > AVG_sale THEN 'GOOD'
+      ELSE 'BAD'
+END AS Sales_Quality       -- ## NOTE ==> To Add Quality column used case function
+ 
+from walmartsalesdata_2024
+cross join 
+(select 
+avg(Total) as AVG_sale 
+from walmartsalesdata_2024) as avg_value;
+-- or
+select Product_line, 
+avg(Total) as AVG_sale 
+from walmartsalesdata_2024
+group by 1;
+-- or
+select
+Product_line, 
+CASE 
+      WHEN Total > AVG_sale THEN 'GOOD'
+      ELSE 'BAD'
+END AS Sales_Quality
+from
+(select 
+Product_line,
+avg(Total) as AVG_sale
+from walmartsalesdata_2024
+group by 1) x
+group by 1;
+
+-- 10. Which branch sold more products than average product sold?
+select * 
+from walmartsalesdata_2024;
+
+select Product_line, 
+count(Quantity)  
+from walmartsalesdata_2024
+group by 1;
+
+
+-- 11. What is the most common product line by gender?
+select Product_line,
+count(Product_line)
+from walmartsalesdata_2024
+group by 1;
+
+
+(select Product_line,
+sum(Quantity) as product_count
+from walmartsalesdata_2024
+group by 1
+order by product_count desc);
+
+
+-- 12. What is the average rating of each product line?
+select product_line,
+round(avg(Rating),2) as AvgRating 
+from walmartsalesdata_2024
+group by 1;
